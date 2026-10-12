@@ -201,7 +201,14 @@ canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-e
 .notes-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 .notes-title{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);font-family:'Rajdhani',sans-serif;}
 .notes-status{font-size:11px;color:var(--green);opacity:0;transition:opacity 0.3s;}
-.notes-box{width:100%;padding:8px 14px;font-size:13px;border:1px solid var(--border2);border-radius:8px;outline:none;background:var(--card);color:var(--text);font-family:'Exo 2',sans-serif;resize:vertical;min-height:60px;line-height:1.5;}
+.notes-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:4px;}
+.nt-btn,.nt-select{font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--card);color:var(--text2);cursor:pointer;font-family:'Exo 2',sans-serif;}
+.nt-btn:hover,.nt-select:hover{border-color:var(--text2);color:var(--text);}
+.nt-select option{background:#0a0d1a;color:#ddd;}
+.nt-sep{width:1px;height:18px;background:var(--border2);margin:0 4px;}
+.notes-box{width:100%;padding:8px 14px;font-size:13px;border:1px solid var(--border2);border-radius:8px;outline:none;background:var(--card);color:var(--text);font-family:'Exo 2',sans-serif;resize:vertical;overflow:auto;min-height:80px;max-height:420px;line-height:1.5;}
+.notes-box:empty:before{content:attr(data-placeholder);color:var(--text3);pointer-events:none;}
+.notes-box ul,.notes-box ol{margin:4px 0 4px 22px;padding:0;}
 .notes-box:focus{border-color:var(--text2);}
 .search-bar{width:100%;padding:8px 14px;font-size:13px;border:1px solid var(--border2);border-radius:8px;margin-bottom:1rem;outline:none;background:var(--card);color:var(--text);font-family:'Exo 2',sans-serif;}
 .search-bar::placeholder{color:var(--text3);}
@@ -552,6 +559,7 @@ canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-e
     <button class="tab-btn" onclick="switchTab('sr3')">Super Rebirth 3</button>
     <button class="tab-btn" onclick="switchTab('sr4')">Super Rebirth 4</button>
     <button class="tab-btn" onclick="switchTab('sr5')">Super Rebirth 5</button>
+    <button class="tab-btn" onclick="switchTab('sr6')">Super Rebirth 6</button>
     <button class="tab-btn" onclick="switchTab('droidex')">Droidex</button>
     <button class="tab-btn ref" onclick="switchTab('ref')">Droid Reference</button>
     <button class="tab-btn nova" onclick="switchTab('nova')">Nova Crystals</button>
@@ -572,7 +580,22 @@ canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-e
     <div class="progress-label" id="prog-label">0 / 0 droids collected</div>
     <div class="notes-wrap">
       <div class="notes-head"><span class="notes-title">Notes for this path</span><span class="notes-status" id="notes-status"></span></div>
-      <textarea class="notes-box" id="path-notes" rows="3" placeholder="Type notes for this rebirth path... (saves automatically)" oninput="onNotesInput()"></textarea>
+      <div class="notes-toolbar" onmousedown="event.preventDefault()">
+        <button type="button" class="nt-btn" title="Bold" onclick="notesCmd('bold')"><b>B</b></button>
+        <button type="button" class="nt-btn" title="Italic" onclick="notesCmd('italic')"><i>I</i></button>
+        <button type="button" class="nt-btn" title="Underline" onclick="notesCmd('underline')"><u>U</u></button>
+        <button type="button" class="nt-btn" title="Strikethrough" onclick="notesCmd('strikeThrough')"><s>S</s></button>
+        <span class="nt-sep"></span>
+        <select class="nt-select" id="notes-size" title="Font size" onchange="notesSize(this)" onmousedown="event.stopPropagation()">
+          <option value="">Size</option><option value="2">Small</option><option value="3">Normal</option><option value="5">Large</option><option value="6">Big Big Big Big</option>
+        </select>
+        <span class="nt-sep"></span>
+        <button type="button" class="nt-btn" title="Bulleted list" onclick="notesCmd('insertUnorderedList')">&bull; List</button>
+        <button type="button" class="nt-btn" title="Numbered list" onclick="notesCmd('insertOrderedList')">1. List</button>
+        <span class="nt-sep"></span>
+        <button type="button" class="nt-btn" title="Clear formatting" onclick="notesCmd('removeFormat')">Clear fmt</button>
+      </div>
+      <div class="notes-box" id="path-notes" contenteditable="true" data-placeholder="Type notes for this rebirth path... (saves automatically)" oninput="onNotesInput()"></div>
     </div>
     <div id="levels"></div>
   </div>
@@ -1116,6 +1139,48 @@ const tiers={
     {lvl:39,credits:"8.00Qa",droids:[["Cyclo-Grav","Kyber"],["Opti-STRK","Kyber"],["Ric","Kyber"]]},
     {lvl:40,credits:"15.00Qa",droids:[["Loadlifter","Kyber"],["Lep","Kyber"],["Ric-1200","Kyber"]]},
   ]},
+  sr6:{data:[
+    {lvl:1,credits:"10K",droids:[["Gonk","Default"],["DRK-1 Probe","Default"],["ID10","Default"]]},
+    {lvl:2,credits:"150K",droids:[["R8","Default"],["B1 Battle","Default"],["Imperial Probe","Default"]]},
+    {lvl:3,credits:"975K",droids:[["Gonk","Gold"],["CB","Gold"],["R5","Gold"]]},
+    {lvl:4,credits:"2.95M",droids:[["R3","Gold"],["B1 Battle","Gold"],["2BB","Default"]]},
+    {lvl:5,credits:"5.35M",droids:[["Imperial Probe","Gold"],["Gonk","Diamond"],["NAV-EX","Default"]]},
+    {lvl:6,credits:"9.85M",droids:[["ID10","Gold"],["A-LT","Default"],["VECT-Arm","Default"]]},
+    {lvl:7,credits:"14.5M",droids:[["Gonk","Beskar"],["R4","Default"],["R9","Default"]]},
+    {lvl:8,credits:"36M",droids:[["HOV-R","Default"],["B1 Security","Default"],["EG-58","Default"]]},
+    {lvl:9,credits:"89M",droids:[["Gonk","Kyber"],["A-LT","Gold"],["R4","Gold"]]},
+    {lvl:10,credits:"220M",droids:[["R9","Gold"],["HOV-R","Gold"],["B1 Security","Gold"]]},
+    {lvl:11,credits:"550M",droids:[["EG-58","Gold"],["BB","Default"],["ORB-Walker","Default"]]},
+    {lvl:12,credits:"1.36B",droids:[["Util-Tec","Default"],["Haul-R","Default"],["R6","Default"]]},
+    {lvl:13,credits:"3.40B",droids:[["EG-58","Galactic"],["EGL","Default"],["TRAK-R","Default"]]},
+    {lvl:14,credits:"8.45B",droids:[["R2","Default"],["B2 Super","Default"],["KT","Default"]]},
+    {lvl:15,credits:"21.00B",droids:[["B2 Heavy","Default"],["Strike-Orb","Default"],["B1 Heavy","Default"]]},
+    {lvl:16,credits:"52.00B",droids:[["EG-58","Kyber"],["MPH","Default"],["Util-Tec","Gold"]]},
+    {lvl:17,credits:"130.00B",droids:[["R6","Gold"],["Haul-R","Gold"],["EGL","Gold"]]},
+    {lvl:18,credits:"325.00B",droids:[["TRAK-R","Gold"],["R2","Gold"],["B2 Super","Gold"]]},
+    {lvl:19,credits:"810.00B",droids:[["B2 Heavy","Gold"],["Strike-Orb","Gold"],["B1 Heavy","Gold"]]},
+    {lvl:20,credits:"2.00T",droids:[["MPH","Gold"],["J09-4MN","Default"],["PLNK","Default"]]},
+    {lvl:21,credits:"3.00T",droids:[["KT","Diamond"],["EGL","Rainbow"],["BB9","Default"]]},
+    {lvl:22,credits:"4.50T",droids:[["R7","Default"],["Cyclo-Grav","Default"],["B2-RP","Default"]]},
+    {lvl:23,credits:"6.00T",droids:[["MPH","Diamond"],["Lng-Shot","Rainbow"],["Opti-STRK","Default"]]},
+    {lvl:24,credits:"9.00T",droids:[["PLNK","Gold"],["Cyclens","Default"],["IG","Default"]]},
+    {lvl:25,credits:"13.50T",droids:[["ECG","Default"],["Tri-Tek","Default"],["KX","Default"]]},
+    {lvl:26,credits:"21.00T",droids:[["PLNK","Diamond"],["J09-4MN","Rainbow"],["Mo-Trak","Default"]]},
+    {lvl:27,credits:"32.00T",droids:[["EGL","Beskar"],["B2-RP","Rainbow"],["ECG","Gold"]]},
+    {lvl:28,credits:"45.00T",droids:[["MPH","Beskar"],["ORB-Walker","Stellar"],["Drft-R","Gold"]]},
+    {lvl:29,credits:"68.00T",droids:[["KT","Galactic"],["BB","Stellar"],["IG","Gold"]]},
+    {lvl:30,credits:"100T",droids:[["Mo-Trak","Gold"],["Cyclens","Diamond"],["Drft-R","Diamond"]]},
+    {lvl:31,credits:"150T",droids:[["Tri-Tek","Diamond"],["KX","Diamond"],["ECG","Rainbow"]]},
+    {lvl:32,credits:"230T",droids:[["BB","Kyber"],["ORB-Walker","Kyber"],["EGL","Kyber"]]},
+    {lvl:33,credits:"345T",droids:[["J09-4MN","Beskar"],["PLNK","Beskar"],["Opti-STRK","Beskar"]]},
+    {lvl:34,credits:"520T",droids:[["KT","Kyber"],["Strike-Orb","Kyber"],["R7","Beskar"]]},
+    {lvl:35,credits:"778T",droids:[["B1 Heavy","Kyber"],["B2 Heavy","Kyber"],["MPH","Kyber"]]},
+    {lvl:36,credits:"1.19Qa",droids:[["Cyclo-Grav","Galactic"],["J09-4MN","Galactic"],["B2-RP","Galactic"]]},
+    {lvl:37,credits:"2.50Qa",droids:[["BB9","Galactic"],["R7","Galactic"],["ECG","Beskar"]]},
+    {lvl:38,credits:"4.50Qa",droids:[["IG","Beskar"],["KX","Beskar"],["Drft-R","Beskar"]]},
+    {lvl:39,credits:"8.00Qa",droids:[["Cyclens","Galactic"],["Mo-Trak","Galactic"],["Tri-Tek","Galactic"]]},
+    {lvl:40,credits:"15.00Qa",droids:[["J09-4MN","Kyber"],["PLNK","Kyber"],["ECG","Kyber"]]},
+  ]},
 };
 
 // ===== CLOUD SYNC =====
@@ -1411,7 +1476,7 @@ function runGlobalSearch(){
   }
 }
 function tierLabel(t){
-  const map={sr1:'Super Rebirth 1',sr2:'Super Rebirth 2',sr3:'Super Rebirth 3',sr4:'Super Rebirth 4',sr5:'Super Rebirth 5'};
+  const map={sr1:'Super Rebirth 1',sr2:'Super Rebirth 2',sr3:'Super Rebirth 3',sr4:'Super Rebirth 4',sr5:'Super Rebirth 5',sr6:'Super Rebirth 6'};
   return map[t]||t;
 }
 document.addEventListener('click',function(e){
@@ -1566,11 +1631,40 @@ function clearAllChecks(){
 const NOTES_KEY='droid_notes_v1';
 let pathNotes=JSON.parse(localStorage.getItem(NOTES_KEY)||'{}');
 let notesTimer=null;
-function loadNotesBox(){const b=document.getElementById('path-notes');if(b)b.value=pathNotes[currentTab]||'';}
+function sanitizeNotes(html){
+  if(!html)return '';
+  if(html.indexOf('<')<0)html=html.replace(/&/g,'&amp;').replace(/\n/g,'<br>');
+  const doc=new DOMParser().parseFromString('<body>'+html+'</body>','text/html');
+  const ok={B:1,STRONG:1,I:1,EM:1,U:1,S:1,STRIKE:1,UL:1,OL:1,LI:1,BR:1,DIV:1,P:1,FONT:1,SPAN:1};
+  const drop={SCRIPT:1,STYLE:1,IFRAME:1,OBJECT:1,EMBED:1,LINK:1,META:1,SVG:1,MATH:1};
+  function clean(node){
+    Array.prototype.slice.call(node.childNodes).forEach(function(ch){
+      if(ch.nodeType===3)return;
+      if(ch.nodeType!==1){node.removeChild(ch);return;}
+      const tag=ch.tagName;
+      if(drop[tag]){node.removeChild(ch);return;}
+      clean(ch);
+      if(!ok[tag]){while(ch.firstChild)node.insertBefore(ch.firstChild,ch);node.removeChild(ch);return;}
+      const size=tag==='FONT'?ch.getAttribute('size'):null;
+      while(ch.attributes.length)ch.removeAttribute(ch.attributes[0].name);
+      if(size&&/^[1-7]$/.test(size))ch.setAttribute('size',size);
+    });
+  }
+  clean(doc.body);
+  return doc.body.innerHTML;
+}
+function loadNotesBox(){const b=document.getElementById('path-notes');if(b)b.innerHTML=sanitizeNotes(pathNotes[currentTab]||'');}
+function notesCmd(c){const b=document.getElementById('path-notes');b.focus();document.execCommand(c,false,null);onNotesInput();}
+function notesSize(sel){
+  const v=sel.value;sel.value='';
+  if(!v)return;
+  const b=document.getElementById('path-notes');b.focus();
+  document.execCommand('fontSize',false,v);onNotesInput();
+}
 function onNotesInput(){
   const b=document.getElementById('path-notes');
-  pathNotes[currentTab]=b.value;
-  if(!b.value)delete pathNotes[currentTab];
+  const empty=!b.innerText.trim();
+  if(empty)delete pathNotes[currentTab];else pathNotes[currentTab]=sanitizeNotes(b.innerHTML);
   clearTimeout(notesTimer);
   notesTimer=setTimeout(function(){
     localStorage.setItem(NOTES_KEY,JSON.stringify(pathNotes));
